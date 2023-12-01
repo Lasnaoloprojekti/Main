@@ -9,6 +9,7 @@ const LoginForm = () => {
   const { setUserInfo } = useContext(userContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [studentNumber, setStudentNumber] = useState(""); // Add state for studentNumber
   const [loginError, setLoginError] = useState("");
   const navigate = useNavigate();
 
@@ -21,6 +22,7 @@ const LoginForm = () => {
       const response = await axios.post("http://localhost:3001/login", {
         username,
         password,
+        studentNumber, // Include studentNumber in the request
       });
 
       const responseData = response.data.apiData;
@@ -39,14 +41,7 @@ const LoginForm = () => {
         localStorage.setItem("userid", responseData.UserId);
         localStorage.setItem("token", responseData.accessToken);
 
-        if (!responseData.staff && responseData.needsGdprConsent) {
-          // Redirect to GDPR consent form for students who haven't given consent
-          // navigate("/gdprconsentform");
-          navigate("/teacherhome");
-        } else {
-          // Navigate to the appropriate home page
-          navigate(responseData.staff ? "/teacherhome" : "/studenthome");
-        }
+        navigate(responseData.redirectUrl);
       } else {
         setLoginError("Invalid username or password");
       }
@@ -80,6 +75,18 @@ const LoginForm = () => {
               type="password"
               placeholder="Enter your password"
               onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-black text-sm font-semibold mb-2 font-roboto-slab">
+              Student Number
+            </label>
+            <input
+              className="w-full p-2 text-black border rounded font-open-sans"
+              type="text"
+              value={studentNumber}
+              onChange={(e) => setStudentNumber(e.target.value)}
+              placeholder="Enter your student number"
             />
           </div>
           <h3 className="text-red-600">{loginError}</h3>

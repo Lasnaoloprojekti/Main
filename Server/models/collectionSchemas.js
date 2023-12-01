@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 //***Student Schema***
-
 const StudentSchema = new mongoose.Schema({
+  user: String,
   firstName: String,
   lastName: String,
   studentNumber: { type: String, unique: true, required: true },
@@ -125,8 +125,8 @@ const CourseSchema = new mongoose.Schema({
 const TopicSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 //Setting the Schemas to models
@@ -139,7 +139,7 @@ const AttendanceSessionDatabaseModel = mongoose.model(
   AttendanceSessionSchema
 );
 const StudentDatabaseModel = mongoose.model("Student", StudentSchema);
-const TopicDatabaseModel = mongoose.model('Topic', TopicSchema);
+const TopicDatabaseModel = mongoose.model("Topic", TopicSchema);
 
 module.exports = {
   UserDatabaseModel,
@@ -147,5 +147,5 @@ module.exports = {
   StudentDatabaseModel,
   AttendanceDatabaseModel,
   AttendanceSessionDatabaseModel,
-  TopicDatabaseModel
+  TopicDatabaseModel,
 };

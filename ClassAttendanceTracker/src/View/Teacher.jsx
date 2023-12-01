@@ -20,7 +20,7 @@ const TeacherHome = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userid");
-    setUserInfo({ staff: false, firstname: "", lastname: "" });
+    setUserInfo({ staff: "", firstname: "", lastname: "" });
     navigate("/login");
   };
 

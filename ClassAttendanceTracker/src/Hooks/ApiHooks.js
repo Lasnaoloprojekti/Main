@@ -252,11 +252,12 @@ const deleteTopicFromCourse = async (courseId, topicName) => {
     throw error;
   }
 };
-const submitGdprConsent = async (userId, studentNumber, gdprConsent) => {
+
+const submitGdprConsent = async (studentNumber, gdprConsent, userId) => {
   try {
     const response = await axios.post(
-      "http://localhost:3001/api/students/update",
-      { userId, studentNumber, gdprConsent },
+      "http://localhost:3001/api/students/updategdpr",
+      { studentNumber, gdprConsent, userId },
       { withCredentials: true }
     );
     return response.data;
@@ -282,7 +283,7 @@ const deactiveCourse = async (courseId) => {
 
 const searchRealization = async (codes) => {
   const body = JSON.stringify({ codes });
-  const url = '/r1/realization/search';
+  const url = "/r1/realization/search";
 
   const apiKey = "uXIj6PjeH9oUHC6IQ7qG";
   const authString = btoa(apiKey + ":");
@@ -290,8 +291,8 @@ const searchRealization = async (codes) => {
   try {
     const response = await axios.post(url, body, {
       headers: {
-        Authorization: 'Basic ' + authString,
-        'Content-Type': 'application/json',
+        Authorization: "Basic " + authString,
+        "Content-Type": "application/json",
       },
     });
     return response.data;

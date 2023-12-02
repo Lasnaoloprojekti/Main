@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./View/Login";
+import StudentLogin from "./View/StudentLogin";
 import StudentHome from "./View/Student";
 import CourseModification from "./View/CourseModification";
 import TeacherHome from "./View/Teacher";
@@ -29,6 +30,7 @@ const App = () => {
             element={<ManualAttendanceCollect />}
           />
           <Route path="/login" element={<Login />} />
+          <Route path="/studentlogin" element={<StudentLogin />} />
           <Route path="*" element={<Login />} />
         </Routes>
       </Router>

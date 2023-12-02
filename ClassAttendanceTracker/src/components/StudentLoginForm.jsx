@@ -1,28 +1,42 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/metropolia_s_orange.png";
 import axios from "axios";
 import { userContext } from "../context/userContext";
+import logo from "../assets/metropolia_s_orange.png";
 import { Box } from "@mui/material";
 
-const LoginForm = () => {
+const StudentLoginForm = () => {
   const { setUserInfo } = useContext(userContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [studentNumber, setStudentNumber] = useState(""); // Add state for studentNumber
+  const [studentNumber, setStudentNumber] = useState("");
   const [loginError, setLoginError] = useState("");
   const navigate = useNavigate();
 
   axios.defaults.withCredentials = true;
 
+  const isStudentNumberValid = (number) => {
+    return number.length === 7 && /^\d+$/.test(number);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!username || !password || !studentNumber) {
+      setLoginError("All fields are required.");
+      return;
+    }
+
+    if (!isStudentNumberValid(studentNumber)) {
+      setLoginError("Invalid student number");
+      return;
+    }
 
     try {
       const response = await axios.post("http://localhost:3001/login", {
         username,
         password,
-        studentNumber, // Include studentNumber in the request
+        studentNumber,
       });
 
       const responseData = response.data.apiData;
@@ -77,7 +91,18 @@ const LoginForm = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-
+          <div className="mb-4">
+            <label className="block text-black text-sm font-semibold mb-2 font-roboto-slab">
+              Student Number
+            </label>
+            <input
+              className="w-full p-2 text-black border rounded font-open-sans"
+              type="text"
+              value={studentNumber}
+              onChange={(e) => setStudentNumber(e.target.value)}
+              placeholder="Enter your student number"
+            />
+          </div>
           <h3 className="text-red-600">{loginError}</h3>
           <button
             className="w-full bg-orange-600 text-white p-2 rounded hover:bg-orange-600 focus:outline-none focus:ring focus:border-orange-700 font-roboto-slab"
@@ -90,4 +115,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default StudentLoginForm;

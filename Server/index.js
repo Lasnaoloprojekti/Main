@@ -325,20 +325,115 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/verify", (req, res) => {
+// DEPLOYMENT LOGIC
+/*app.post("/login", async (req, res) => {
+  const { username, password, studentNumber } = req.body;
+
+  try {
+    const apiResponse = await fetch("https://streams.metropolia.fi/2.0/api/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const apiData = await apiResponse.json();
+
+    if (apiData.message === "invalid username or password") {
+      return res.status(401).json({ error: "invalid username or password" });
+    } else {
+      let existingUser = await UserDatabaseModel.findOne({
+        user: apiData.user,
+      });
+
+      if (!existingUser && apiData.staff) {
+        // Create a new user if staff
+        existingUser = new UserDatabaseModel({
+          user: apiData.user,
+          firstName: apiData.firstname,
+          lastName: apiData.lastname,
+          email: apiData.email,
+          staff: apiData.staff,
+          studentNumber: [],
+          courses: [], // Assuming courses are initially empty
+        });
+        await existingUser.save();
+      }
+
+      let redirectUrl;
+      let student;
+
+      if (!apiData.staff) {
+        // Handle student login
+        student = await StudentDatabaseModel.findOne({
+          studentNumber,
+        });
+
+        if (!student) {
+          // Create a new student record
+          student = new StudentDatabaseModel({
+            studentNumber,
+            studentuser: apiData.user,
+            gdprConsent: false,
+            firstName: apiData.firstname,
+            lastName: apiData.lastname,
+            email: apiData.email,
+          });
+          await student.save();
+        }
+
+        // Set GDPR consent status for the student
+        redirectUrl = student.gdprConsent ? "/studenthome" : "/gdprconsentform";
+        apiData.UserId = student._id.toString();
+      } else {
+        // Handle staff login
+        redirectUrl = "/teacherhome";
+        apiData.UserId = existingUser ? existingUser._id.toString() : null;
+      }
+
+      const accessToken = jwt.sign(
+        { user: apiData.user, staff: apiData.staff },
+        process.env.ACCESS_TOKEN_SECRET
+      );
+
+      apiData.accessToken = accessToken;
+
+      res.status(200).json({ apiData, redirectUrl });
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ error: "An error occurred during login" });
+  }
+});
+
+*/
+
+app.get("/verify", async (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
   console.log("Token:", token);
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
-    if (err) {
-      console.error("Error during token verification:", err);
-      return res.status(403).json({ error: "Invalid token" });
+  jwt.verify(
+    token,
+    process.env.ACCESS_TOKEN_SECRET,
+    async (err, studentuser, user) => {
+      if (err) {
+        console.error("Error during token verification:", err);
+        return res.status(403).json({ error: "Invalid token" });
+      }
+      try {
+        let student = await StudentDatabaseModel.findOne({ studentuser });
+        let existingUser = await UserDatabaseModel.findOne({ user });
+        const responseData = {
+          user: existingUser,
+          studentuser: student,
+        };
+        res.status(200).json(responseData);
+      } catch (error) {
+        console.error("Error in /verify:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
     }
-    let student = await StudentDatabaseModel.findOne({ user });
-    res.status(200).json(student);
-
-    let existingUser = await UserDatabaseModel.findOne({ user });
-    //res.status(200).json(existingUser);
-  });
+  );
 });
 
 app.post("/createcourse", async (req, res) => {
@@ -423,7 +518,7 @@ app.post("/addstudents", async (req, res) => {
     for (const studentData of studentsToAdd) {
       const { firstName, lastName, studentNumber } = studentData;
 
-      console.log("Adding student:", firstName, lastName, studentNumber);
+      console.log("Processing student:", firstName, lastName, studentNumber);
 
       // Check if the student already exists in the database
       let student = await StudentDatabaseModel.findOne({
@@ -431,30 +526,29 @@ app.post("/addstudents", async (req, res) => {
       }).session(session);
 
       if (!student) {
-        // Create a new student record if not exists
         student = new StudentDatabaseModel({
           firstName,
           lastName,
           studentNumber,
-          gdprConsent: false, // Default to false or adjust as needed
+          gdprConsent: false,
           courses: [{ course: courseId }],
         });
+
         await student.save({ session });
+        addedStudents.push(student);
       } else {
-        // If the student exists, send a response to the client indicating the conflict
-        // You can customize the response message as needed
-        return res.status(409).json({
-          message: `Student with student number ${studentNumber} already exists.`,
-          student: student,
-        });
+        // If the student exists, just add them to the course if not already added
+        if (!student.courses.find((c) => c.course.toString() === courseId)) {
+          student.courses.push({ course: courseId });
+          await student.save({ session });
+          addedStudents.push(student);
+        }
       }
 
       // Add the student to the course's students list if not already added
       if (!course.students.includes(student._id)) {
-        course.students.push(student);
+        course.students.push(student._id);
       }
-
-      addedStudents.push(student);
     }
 
     await course.save({ session });
@@ -462,11 +556,10 @@ app.post("/addstudents", async (req, res) => {
     session.endSession();
 
     res.status(200).json({
-      message: "Student added successfully",
-      students: addedStudents,
+      message: `${addedStudents.length} student(s) added/updated successfully.`,
+      addedStudents,
     });
   } catch (error) {
-    // If an error occurs, abort the transaction
     await session.abortTransaction();
     session.endSession();
     console.error("An error occurred while adding students:", error);

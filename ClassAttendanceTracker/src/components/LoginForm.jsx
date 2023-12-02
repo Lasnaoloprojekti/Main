@@ -9,7 +9,6 @@ const LoginForm = () => {
   const { setUserInfo } = useContext(userContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [studentNumber, setStudentNumber] = useState(""); // Add state for studentNumber
   const [loginError, setLoginError] = useState("");
   const navigate = useNavigate();
 
@@ -22,7 +21,6 @@ const LoginForm = () => {
       const response = await axios.post("http://localhost:3001/login", {
         username,
         password,
-        studentNumber, // Include studentNumber in the request
       });
 
       const responseData = response.data.apiData;

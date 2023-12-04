@@ -243,7 +243,6 @@ app.post("/uploadstudents", upload.single("studentfile"), async (req, res) => {
     res.status(500).send("Error processing file");
   }
 });
-
 app.post("/login", async (req, res) => {
   const { username, password, studentNumber } = req.body;
 
@@ -284,7 +283,7 @@ app.post("/login", async (req, res) => {
       if (!apiData.staff) {
         // Handle student login
         let student = await StudentDatabaseModel.findOne({
-          user: apiData.user,
+          studentNumber,
         });
 
         if (!student) {
@@ -324,9 +323,9 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: "An error occurred during login" });
   }
 });
-
+/*
 // DEPLOYMENT LOGIC
-/*app.post("/login", async (req, res) => {
+app.post("/login", async (req, res) => {
   const { username, password, studentNumber } = req.body;
 
   try {
@@ -393,7 +392,7 @@ app.post("/login", async (req, res) => {
       }
 
       const accessToken = jwt.sign(
-        { user: apiData.user, staff: apiData.staff },
+        { user: apiData.user, studentuser: apiData.user, staff: apiData.staff },
         process.env.ACCESS_TOKEN_SECRET
       );
 
@@ -406,9 +405,7 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: "An error occurred during login" });
   }
 });
-
 */
-
 app.get("/verify", async (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
   console.log("Token:", token);

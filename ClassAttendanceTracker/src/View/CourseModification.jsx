@@ -2,11 +2,11 @@ import React from 'react'
 import AddStudents from '../components/AddStudents';
 
 const CourseModification = () => {
-    return (
-        <>
-          <AddStudents></AddStudents>
-        </>
-      );
-    };
+  return (
+    <>
+      <AddStudents></AddStudents>
+    </>
+  );
+};
 
 export default CourseModification

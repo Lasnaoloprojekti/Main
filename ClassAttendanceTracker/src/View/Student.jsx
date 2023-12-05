@@ -13,7 +13,7 @@ export const StudentHome = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userid");
     setUserInfo({ staff: false, firstname: "", lastname: "" });
-    navigate("/login");
+    navigate("/studentlogin");
   };
 
   const handleMainButtonClick = (mainButton) => {
@@ -39,7 +39,7 @@ export const StudentHome = () => {
   return (
     <>
       <nav className="flex justify-between items-center">
-        <Link to="/teacherhome">
+        <Link to="/studenthome">
           <img className="h-10 m-4" src={logo} alt="Logo" />
         </Link>
         <ul className="flex items-center">

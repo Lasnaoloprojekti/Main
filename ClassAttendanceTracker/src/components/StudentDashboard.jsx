@@ -1,39 +1,54 @@
 import React, { useState, useEffect } from "react";
+import QRscanner from 'react-qr-scanner';
+import SuccessGif from "../assets/registering.gif"
 
 export const StudentDashboard = () => {
-  const [studentNumber, setStudentNumber] = useState("");
+  const [studentNumber, setStudentNumber] = useState(localStorage.getItem("studentNumber"));
   const [registerMessage, setRegisterMessage] = useState("");
   const [participationData, setParticipationData] = useState(null);
+  const [showScanner, setShowScanner] = useState(false);
+  const [isProcessingScan, setIsProcessingScan] = useState(false);
+  const [showSuccessGif, setShowSuccessGif] = useState(false);
 
-  // Combine the useEffect for time update from Registration
+  const handleScanQrCode = async (data) => {
+    if (data && !isProcessingScan) {
+      setIsProcessingScan(true);
 
-  const handleRegistration = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
+      try {
+        const qrCodeText = data.text;
+        console.log("teksti qr koodista ", qrCodeText);
+        const response = await fetch("http://localhost:3001/qrcoderegistration", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ studentNumber, qrCodeIdentifier: qrCodeText }),
+        });
 
-    try {
-      const response = await fetch("http://localhost:3001/registration", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ studentNumber }),
-      });
+        if (!response.ok) {
+          const result = await response.json();
+          throw new Error(result.message || response.statusText);
+        }
 
-      const data = await response.json();
-      if (response.ok) {
-        console.log("Registration successful:", data);
-
-        setRegisterMessage("Registration successful");
-      } else {
-        console.error("Registration failed:", data);
+        const result = await response.json();
+        setRegisterMessage(result.message);
+        setShowSuccessGif(true);
+        setShowScanner(false); // Close the scanner as the registration is successful
+      } catch (error) {
+        console.error(error);
+        setRegisterMessage(error.message || "Error during registration");
+      } finally {
+        setIsProcessingScan(false);
       }
-    } catch (error) {
-      console.error("Error during registration:", error);
-      setRegisterMessage(
-        "This student number is either not in the course or you may have already enrolled. Ask help from your teacher."
-      );
     }
   };
+
+
+
+  const handleError = (err) => {
+    console.error(err);
+  };
+
   const fetchParticipationData = async () => {
     try {
       const response = await fetch(
@@ -103,30 +118,36 @@ export const StudentDashboard = () => {
             className="border border-gray-300 p-3 rounded-lg block w-full mb-4"
           />
         </div>
-        <div className="flex flex-col justify-between">
+        <div className="flex flex-col justify-between items-center">
           <button
             onClick={fetchParticipationData}
             className="px-4 mb-4 py-2 bg-blue-900 hover:bg-blue-700 text-white rounded-lg transition-colors">
             Show Participation Rates
           </button>
-          <button
-            onClick={handleRegistration}
-            className="px-4 py-2 bg-blue-900 hover:bg-blue-700 text-white rounded-lg transition-colors">
-            Enroll
+          <button className="px-4 mb-4 py-2 bg-blue-900 hover:bg-blue-700 text-white rounded-lg transition-colors" onClick={() => setShowScanner(!showScanner)}>
+            {showScanner ? 'Hide Scanner' : 'Scan QR Code'}
           </button>
         </div>
-        <p
-          className={`mt-6 underline ${
-            registerMessage.includes("successful")
-              ? "text-green-600"
-              : "text-red-600"
-          }`}>
+        {showScanner && (
+          <QRscanner
+            delay={300}
+            style={{ width: '100%' }}
+            onError={handleError}
+            onScan={handleScanQrCode}
+          />
+        )}
+        <p className={`mt-6 text-center text-xl ${registerMessage.includes("registered") ? "text-green-600" : "text-red-600"}`}>
           {registerMessage}
         </p>
+        {showSuccessGif && registerMessage.includes("registered") && (
+          <div className="text-center mt-4 flex justify-center">
+            <img className="justify-center h-[8rem] rounded-lg" src={SuccessGif} alt="Registration Successful" />
+          </div>
+        )}
       </div>
       {participationData && <ParticipationTable data={participationData} />}
     </div>
   );
-};
 
+};
 export default StudentDashboard;

@@ -81,11 +81,10 @@ export const Registration = () => {
             </label>
           </div>
           <p
-            className={`self-center w-2/3 mt-6 underline ${
-              registerMessage.includes("successful")
-                ? "text-green-600"
-                : "text-red-600"
-            }`}>
+            className={`self-center w-2/3 mt-6 underline ${registerMessage.includes("successful")
+              ? "text-green-600"
+              : "text-red-600"
+              }`}>
             {registerMessage}
           </p>
         </form>

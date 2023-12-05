@@ -14,6 +14,8 @@ export const ManualAttendanceCollect = () => {
     const [attendingStudents, setAttendingStudents] = useState([]);
     const [nonAttendingStudents, setNonAttendingStudents] = useState([]);
     const [showModal, setShowModal] = useState(true);
+    const [refreshInterval, setRefreshInterval] = useState(5); // Default to 5 minutes
+
 
     const handleLogout = () => {
         localStorage.removeItem("token");

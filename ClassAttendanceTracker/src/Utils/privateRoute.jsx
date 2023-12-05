@@ -4,7 +4,7 @@ import { userContext } from '../context/userContext';
 
 
 const PrivateRoutes = () => {
-console.log('private routes')
+    console.log('private routes')
     const { userInfo } = useContext(userContext);
 
     const isAuthenticated = userInfo.firstname !== "" && userInfo.lastname !== "";

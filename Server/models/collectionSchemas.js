@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const StudentSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
-  studentNumber: { type: String, unique: true, required: true },
+  studentNumber: { type: String, unique: false, required: false, sparse: true },
   gdprConsent: Boolean,
   courses: [
     {

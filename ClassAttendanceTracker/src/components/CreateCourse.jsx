@@ -1,3 +1,4 @@
+//Course creating through excel with student adding through excel
 import React, { useState, useEffect } from "react";
 import {
   createCourse,
@@ -21,6 +22,8 @@ const CreateCourse = () => {
   const [newTeacher, setNewTeacher] = useState("");
   const [selectedTeachers, setSelectedTeachers] = useState([]);
   const [allTeachers, setAllTeachers] = useState([]);
+  const [studentData, setStudentData] = useState(""); //
+  const [showStudentForm, setShowStudentForm] = useState(false);
   const [alert, setAlert] = useState({
     show: false,
     message: "",
@@ -68,6 +71,17 @@ const CreateCourse = () => {
       })
       .filter((id) => id != null); // Filter out any undefined IDs
 
+    const studentsToAdd = studentData
+      .split("\n")
+      .map((line) => {
+        const [lastName, firstName, studentNumber] = line.split(";");
+        return { lastName, firstName, studentNumber };
+      })
+      .filter(
+        (student) =>
+          student.lastName && student.firstName && student.studentNumber
+      );
+
     if (window.confirm("Are you sure you want to create this course?")) {
       try {
         const userId = localStorage.getItem("userid"); // Retrieve the teacher's ID
@@ -79,6 +93,7 @@ const CreateCourse = () => {
           endDate: courseData.endDate,
           userId, // Include the creator's ID in the request
           teachers: teacherIds, // Array of teacher IDs
+          studentsToAdd,
         };
 
         await createCourse(requestData);
@@ -151,6 +166,13 @@ const CreateCourse = () => {
     }
   };
 
+  const handleRemoveTopic = (topicToRemove) => {
+    setCourseData((prevData) => ({
+      ...prevData,
+      topics: prevData.topics.filter((topic) => topic !== topicToRemove),
+    }));
+  };
+
   const handleAddTeacher = () => {
     if (newTeacher && !selectedTeachers.includes(newTeacher)) {
       setSelectedTeachers((prevTeachers) => [...prevTeachers, newTeacher]);
@@ -169,6 +191,10 @@ const CreateCourse = () => {
     setSelectedTeachers(
       selectedTeachers.filter((teacher) => teacher !== teacherToRemove)
     );
+  };
+
+  const handleToggleStudentForm = () => {
+    setShowStudentForm(!showStudentForm); // Toggle the visibility of the student form
   };
 
   const handleFileUpload = async (e) => {
@@ -194,13 +220,42 @@ const CreateCourse = () => {
       const ws = wb.Sheets[wsname];
       const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
+      const studentsData = data
+        .slice(2)
+        .map((row) => {
+          return {
+            lastName: row[0],
+            firstName: row[1],
+            studentNumber: row[4],
+          };
+        })
+        .filter((student) => {
+          return student.lastName && student.firstName && student.studentNumber;
+        });
+
+      const studentsText = studentsData
+        .map(
+          (student) =>
+            `${student.lastName};${student.firstName};${student.studentNumber};`
+        )
+        .join("\n");
+
+      setStudentData(studentsText);
+
       const firstCell = data[0][0];
       const regex = /\(([^)]+)\)/;
       const matches = regex.exec(firstCell);
 
       if (matches && matches[1]) {
+        const extractedGroupCode = matches[1]; // Extracted group code from Excel
+        // Set the extracted group code as the group name
+        setCourseData((prevData) => ({
+          ...prevData,
+          groupName: extractedGroupCode,
+        }));
+
         try {
-          const response = await searchRealization([matches[1]]);
+          const response = await searchRealization([extractedGroupCode]);
           if (
             response &&
             response.realizations &&
@@ -211,13 +266,10 @@ const CreateCourse = () => {
             // Set the course data
             setCourseData({
               courseName: courseInfo.name,
-              groupName:
-                courseInfo.studentGroups && courseInfo.studentGroups.length > 0
-                  ? courseInfo.studentGroups[0].code
-                  : "",
               startDate: courseInfo.startDate.split("T")[0],
               endDate: courseInfo.endDate.split("T")[0],
               topics: [], // Reset topics or set them as needed
+              groupName: extractedGroupCode,
             });
           }
         } catch (error) {
@@ -388,6 +440,31 @@ const CreateCourse = () => {
               onChange={handleChange}
             />
           </div>
+
+          {/* Button to toggle student input form visibility */}
+          <button
+            type="button"
+            className="mt-4 mb-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            onClick={handleToggleStudentForm}
+          >
+            {showStudentForm ? "Hide Student Form" : "Add Students"}
+          </button>
+
+          {/* Conditional rendering of the student input form */}
+          {showStudentForm && (
+            <div className="mb-4">
+              <label className="block text-black text-sm font-semibold mb-2">
+                Students (LastName;FirstName;StudentNumber; format):
+              </label>
+              <textarea
+                rows="6"
+                className="w-full p-2 border rounded"
+                value={studentData}
+                onChange={(e) => setStudentData(e.target.value)}
+                placeholder="Doe;John;123456;"
+              />
+            </div>
+          )}
 
           <div className="mb-4">
             <label className="block text-black text-sm font-semibold mb-2">

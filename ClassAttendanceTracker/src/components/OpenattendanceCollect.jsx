@@ -9,7 +9,7 @@ import {
   Radio,
   RadioGroup,
 } from "@mui/material";
-import axios from 'axios';
+import axios from "axios";
 
 const userId = localStorage.getItem("userid");
 
@@ -79,12 +79,17 @@ const OpenattendanceCollect = () => {
     setTimeOfDay(event.target.value);
   };
 
-
-  const checkStudentsAndNavigate = async (sessionId, courseName, topic, path) => {
+  const checkStudentsAndNavigate = async (
+    sessionId,
+    courseName,
+    topic,
+    path
+  ) => {
     try {
-
       console.log("Checking student count for course:", selectedCourse);
-      const response = await axios.get(`http://localhost:3001/getstudents/${selectedCourse}`);
+      const response = await axios.get(
+        `http://localhost:3001/getstudents/${selectedCourse}`
+      );
       const { studentCount } = response.data;
       console.log("Student count:", studentCount);
 
@@ -97,7 +102,9 @@ const OpenattendanceCollect = () => {
         );
       } else {
         // If there are no students, display a message
-        alert("This course does not have any students currently, please add them first.");
+        alert(
+          "This course does not have any students currently, please add them first."
+        );
       }
     } catch (error) {
       console.error("Error checking student count:", error);
@@ -128,7 +135,12 @@ const OpenattendanceCollect = () => {
       (course) => course._id === selectedCourse
     )?.name;
 
-    await checkStudentsAndNavigate(sessionId, selectedCourseName, selectedTopic, 'wait');
+    await checkStudentsAndNavigate(
+      sessionId,
+      selectedCourseName,
+      selectedTopic,
+      "wait"
+    );
   };
 
   const HandleManualAttendanceCollect = async (event) => {
@@ -154,7 +166,12 @@ const OpenattendanceCollect = () => {
       (course) => course._id === selectedCourse
     )?.name;
 
-    await checkStudentsAndNavigate(sessionId, selectedCourseName, selectedTopic, 'manual');
+    await checkStudentsAndNavigate(
+      sessionId,
+      selectedCourseName,
+      selectedTopic,
+      "manual"
+    );
   };
 
   const validateForm = () => {
@@ -164,7 +181,6 @@ const OpenattendanceCollect = () => {
     }
     return true;
   };
-
 
   return (
     <div className="min-h-screen w-full items-center flex flex-col px-6">
@@ -191,18 +207,19 @@ const OpenattendanceCollect = () => {
               </MenuItem>
               {courses.map((course) => (
                 <MenuItem key={course._id} value={course._id}>
-                  {course.name} / {course.groupName} {/* Concatenating course name and group name */}
+                  {course.name} / {course.groupName}{" "}
+                  {/* Concatenating course name and group name */}
                 </MenuItem>
               ))}
             </Select>
-
           </div>
 
           <div className="mb-4">
             <label className="block mb-2 text-sm font-medium text-gray-600 font-roboto-slab">
               Select Topic
             </label>
-            <Select required
+            <Select
+              required
               className="border border-gray-300 p-3 h-14 block w-full font-open-sans"
               style={{ borderRadius: "8px" }}
               value={selectedTopic}
@@ -265,7 +282,8 @@ const OpenattendanceCollect = () => {
             <Link
               className="text-blue-500"
               onClick={HandleManualAttendanceCollect}>
-              Take attendances manually</Link>
+              Take attendances manually
+            </Link>
           </div>
         </form>
       </div>

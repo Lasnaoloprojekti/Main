@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { selectActiveCourse, useAddStudentsToCourse, uploadStudentsFile } from "../Hooks/ApiHooks";
+import {
+  selectActiveCourse,
+  useAddStudentsToCourse,
+  uploadStudentsFile,
+} from "../Hooks/ApiHooks";
 
 const userId = localStorage.getItem("userid");
 
@@ -55,7 +59,7 @@ const AddStudents = () => {
 
   const setFileNull = () => {
     setFile(null);
-  }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -63,7 +67,11 @@ const AddStudents = () => {
     setAlert({ show: false, message: "", isError: false });
 
     if (!selectedCourse) {
-      setAlert({ show: true, message: "Please select a course.", isError: true });
+      setAlert({
+        show: true,
+        message: "Please select a course.",
+        isError: true,
+      });
       setIsAdding(false);
       return;
     }
@@ -71,15 +79,23 @@ const AddStudents = () => {
     // Handle text area data submission
     if (studentData && validateStudentData(studentData)) {
       try {
-        const studentDataArray = studentData.split("\n").map(line => {
-          const [lastName, firstName, studentNumber] = line.split(';');
+        const studentDataArray = studentData.split("\n").map((line) => {
+          const [lastName, firstName, studentNumber] = line.split(";");
           return { lastName, firstName, studentNumber };
         });
 
         const addResult = await addStudents(selectedCourse, studentDataArray);
-        setAlert({ show: true, message: addResult.data.message, isError: false });
+        setAlert({
+          show: true,
+          message: addResult.data.message,
+          isError: false,
+        });
       } catch (error) {
-        setAlert({ show: true, message: "Student with provided student number already exists!", isError: true });
+        setAlert({
+          show: true,
+          message: "Student with provided student number already exists!",
+          isError: true,
+        });
       }
     }
 
@@ -89,7 +105,6 @@ const AddStudents = () => {
         const uploadResult = await uploadStudentsFile(selectedCourse, file);
 
         console.log(uploadResult);
-
 
         setAlert({ show: true, message: uploadResult.message, isError: false });
       } catch (error) {
@@ -101,9 +116,6 @@ const AddStudents = () => {
     setIsAdding(false);
   };
 
-
-
-
   return (
     <div className="min-h-screen w-full items-center flex flex-col px-6">
       <div className="max-w-4xl w-full">
@@ -111,7 +123,6 @@ const AddStudents = () => {
           Add Students to course
         </div>
         <div className="bg-white p-8 border border-gray-300 rounded-lg shadow-lg">
-
           <form onSubmit={handleSubmit}>
             <div className="mb-5">
               <label
@@ -129,7 +140,8 @@ const AddStudents = () => {
                 </option>
                 {courses.map((course) => (
                   <option key={course._id} value={course._id}>
-                    {course.name} / {course.groupName} {/* Concatenating name and groupName */}
+                    {course.name} / {course.groupName}{" "}
+                    {/* Concatenating name and groupName */}
                   </option>
                 ))}
               </select>
@@ -175,10 +187,11 @@ const AddStudents = () => {
           </form>
           {alert.show && (
             <div
-              className={`mt-4 p-4 rounded-md transition-all ${alert.isError
-                ? "bg-red-100 border border-red-400 text-red-800"
-                : "bg-green-100 border border-green-400 text-green-800"
-                }`}>
+              className={`mt-4 p-4 rounded-md transition-all ${
+                alert.isError
+                  ? "bg-red-100 border border-red-400 text-red-800"
+                  : "bg-green-100 border border-green-400 text-green-800"
+              }`}>
               <p>{alert.message}</p>
             </div>
           )}

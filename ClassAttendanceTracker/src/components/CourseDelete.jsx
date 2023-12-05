@@ -72,13 +72,13 @@ const CourseDelete = () => {
             </label>
             <select
               value={selectedCourse}
-              onChange={e => setSelectedCourse(e.target.value)}
-              className="border font-open-sans border-gray-300 p-3 rounded-lg block w-full mb-4"
-            >
+              onChange={(e) => setSelectedCourse(e.target.value)}
+              className="border font-open-sans border-gray-300 p-3 rounded-lg block w-full mb-4">
               <option value="">Select Course</option>
-              {courses.map(course => (
+              {courses.map((course) => (
                 <option key={course._id} value={course._id}>
-                  {course.name} / {course.groupName} {/* Concatenating course name and group name */}
+                  {course.name} / {course.groupName}{" "}
+                  {/* Concatenating course name and group name */}
                 </option>
               ))}
             </select>
@@ -92,10 +92,11 @@ const CourseDelete = () => {
           </button>
           {alert.show && (
             <div
-              className={`mt-4 p-4 rounded-md transition-all ${alert.isError
-                ? "bg-red-100 border border-red-400 text-red-800"
-                : "bg-green-100 border border-green-400 text-green-800"
-                }`}>
+              className={`mt-4 p-4 rounded-md transition-all ${
+                alert.isError
+                  ? "bg-red-100 border border-red-400 text-red-800"
+                  : "bg-green-100 border border-green-400 text-green-800"
+              }`}>
               <p>{alert.message}</p>
             </div>
           )}

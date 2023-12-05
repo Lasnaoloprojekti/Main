@@ -36,7 +36,6 @@ const StudentLoginForm = () => {
       const response = await axios.post("http://localhost:3001/login", {
         username,
         password,
-        studentNumber,
       });
 
       const responseData = response.data.apiData;
@@ -49,11 +48,13 @@ const StudentLoginForm = () => {
           staff: responseData.staff,
           firstname: responseData.firstname,
           lastname: responseData.lastname,
-          userId: responseData.UserId,
+          userId: responseData.userId,
+          studentNumber: studentNumber,
         });
 
-        localStorage.setItem("userid", responseData.UserId);
+        localStorage.setItem("userid", responseData.userId);
         localStorage.setItem("token", responseData.accessToken);
+        localStorage.setItem("studentnumber", studentNumber);
 
         navigate(responseData.redirectUrl);
       } else {

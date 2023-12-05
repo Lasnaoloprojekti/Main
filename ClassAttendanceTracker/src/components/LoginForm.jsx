@@ -33,10 +33,10 @@ const LoginForm = () => {
           staff: responseData.staff,
           firstname: responseData.firstname,
           lastname: responseData.lastname,
-          userId: responseData.UserId,
+          userId: responseData.userId,
         });
 
-        localStorage.setItem("userid", responseData.UserId);
+        localStorage.setItem("userid", responseData.userId);
         localStorage.setItem("token", responseData.accessToken);
 
         navigate(responseData.redirectUrl);

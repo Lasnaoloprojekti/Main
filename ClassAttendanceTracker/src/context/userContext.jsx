@@ -5,11 +5,11 @@ const userContext = createContext();
 
 const UserContextProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState({
-    staff: "",
+    staff: false,
     firstname: "",
     lastname: "",
     userId: "",
-    studentNumber: "", // Add studentNumber to the state
+    studentNumber: "",
   });
 
   const accessToken = localStorage.getItem("token");
@@ -17,14 +17,21 @@ const UserContextProvider = ({ children }) => {
   const verify = async () => {
     if (accessToken) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-      const user = await axios.get("http://localhost:3001/verify");
-      console.log("verifioinnista saatava data", user.data);
-      if (user.data) {
-        setUserInfo({
-          staff: user.data.staff,
-          firstname: user.data.firstName,
-          lastname: user.data.lastName,
-        });
+      try {
+        const response = await axios.get("http://localhost:3001/verify");
+        if (response.data) {
+          const { user, student } = response.data;
+          setUserInfo({
+            staff: user.staff,
+            firstname: user.firstName,
+            lastname: user.lastName,
+            userId: user._id,
+            studentNumber: student ? student.studentNumber : "",
+          });
+        }
+      } catch (error) {
+        console.error("Error verifying token:", error);
+        // Handle error
       }
     }
   };

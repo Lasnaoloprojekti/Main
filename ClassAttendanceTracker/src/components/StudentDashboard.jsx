@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 export const StudentDashboard = () => {
-  const [studentNumber, setStudentNumber] = useState("");
+  const [studentNumber] = useState("");
   const [registerMessage, setRegisterMessage] = useState("");
   const [participationData, setParticipationData] = useState(null);
 
@@ -34,13 +34,12 @@ export const StudentDashboard = () => {
       );
     }
   };
-  const fetchParticipationData = async () => {
+  const fetchParticipationData = async (studentNumber) => {
     try {
       const response = await fetch(
         `http://localhost:3001/api/participation/${studentNumber}`
       );
-      const data = await response.json();
-      setParticipationData(data);
+      setParticipationData(response.data);
     } catch (error) {
       console.error("Error fetching participation data:", error);
       // Handle error
@@ -95,13 +94,6 @@ export const StudentDashboard = () => {
           <label className="block mb-2 text-sm font-medium text-gray-600">
             Enter your student number:
           </label>
-          <input
-            type="text"
-            value={studentNumber}
-            onChange={(e) => setStudentNumber(e.target.value)}
-            placeholder="Enter Student Number"
-            className="border border-gray-300 p-3 rounded-lg block w-full mb-4"
-          />
         </div>
         <div className="flex flex-col justify-between">
           <button

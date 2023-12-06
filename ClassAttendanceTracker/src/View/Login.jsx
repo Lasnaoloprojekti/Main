@@ -10,8 +10,7 @@ const Login = () => {
 
   useEffect(() => {
     if (userInfo && userInfo.firstname !== "" && userInfo.lastname !== "") {
-      //  navigate(userInfo.staff ? "/teacherhome" : "/studenthome");
-      navigate("/teacherhome");
+      navigate(userInfo.staff ? "/teacherhome" : "/teacherhome");
     }
   }, [userInfo, navigate]);
 

@@ -90,7 +90,6 @@ const UserSchema = new mongoose.Schema({
   lastName: String,
   email: String,
   staff: Boolean,
-  studentNumber: [],
   courses: [
     {
       type: mongoose.Schema.Types.ObjectId,

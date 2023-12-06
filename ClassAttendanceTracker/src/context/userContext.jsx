@@ -9,7 +9,6 @@ const UserContextProvider = ({ children }) => {
     firstname: "",
     lastname: "",
     userId: "",
-    studentNumber: "",
   });
 
   const accessToken = localStorage.getItem("token");
@@ -17,22 +16,16 @@ const UserContextProvider = ({ children }) => {
   const verify = async () => {
     if (accessToken) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-      try {
-        const response = await axios.get("http://localhost:3001/verify");
-        if (response.data) {
-          const { user, student } = response.data;
-          setUserInfo({
-            staff: user.staff,
-            firstname: user.firstName,
-            lastname: user.lastName,
-            userId: user._id,
-            studentNumber: student ? student.studentNumber : "",
-          });
-        }
-      } catch (error) {
-        console.error("Error verifying token:", error);
-        // Handle error
+      const user = await axios.get("http://localhost:3001/verify");
+      console.log("verifioinnista saatava data", user.data);
+      if (user.data) {
+        setUserInfo({
+          staff: user.data.staff,
+          firstname: user.data.firstName,
+          lastname: user.data.lastName,
+        });
       }
+      console.log("User data from verification:", user.data); // Log the user data
     }
   };
 

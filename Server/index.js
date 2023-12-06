@@ -163,9 +163,11 @@ app.post("/uploadstudents", upload.single("studentfile"), async (req, res) => {
   }
 });
 
+// DEPLOYMENT ONLY
+
 /*
 app.post("/login", async (req, res) => {
-  const { username, password, studentNumber } = req.body;
+  const { username, password } = req.body;
 
   try {
     const apiResponse = await fetch("https://streams.metropolia.fi/2.0/api/", {
@@ -180,74 +182,46 @@ app.post("/login", async (req, res) => {
 
     if (apiData.message === "invalid username or password") {
       return res.status(401).json({ error: "invalid username or password" });
-    } else {
-      let existingUser = await UserDatabaseModel.findOne({
-        user: apiData.user,
-      });
-
-      if (!existingUser) {
-        // Create a new user
-        existingUser = new UserDatabaseModel({
-          user: apiData.user,
-          firstName: apiData.firstname,
-          lastName: apiData.lastname,
-          email: apiData.email,
-          staff: apiData.staff,
-          courses: [], // Assuming courses are initially empty
-        });
-        await existingUser.save();
-      }
-
-      // Initialize variables for GDPR consent and redirection URL
-      let redirectUrl;
-
-      if (!apiData.staff) {
-        // Handle student login
-        let existingStudent = await StudentDatabaseModel.findOne({
-          studentNumber,
-        });
-
-        if (!existingStudent) {
-          // Create a new student record
-          existingStudent = new StudentDatabaseModel({
-            student: apiData.user,
-            studentNumber: studentNumber,
-            gdprConsent: false, // Default to false or adjust as needed
-            firstName: apiData.firstname,
-            lastName: apiData.lastname,
-            email: apiData.email,
-          });
-          await existingStudent.save();
-        }
-        apiData.userId = existingStudent._id.toString();
-
-        // Set GDPR consent status for the student
-        gdprConsent = existingStudent.gdprConsent;
-        redirectUrl = gdprConsent ? "/studenthome" : "/gdprconsentform";
-      } else {
-        // Handle staff login
-        redirectUrl = "/teacherhome";
-      }
-
-      const accessToken = jwt.sign(
-        apiData.user,
-        process.env.ACCESS_TOKEN_SECRET
-      );
-
-      apiData.accessToken = accessToken;
-      apiData.userId = existingUser._id.toString();
-
-      res.status(apiResponse.status).json({ apiData });
     }
+
+    if (!apiData.staff) {
+      return res
+        .status(403)
+        .json({ error: "Access denied. Only staff can login." });
+    }
+
+    let existingUser = await UserDatabaseModel.findOne({ user: apiData.user });
+
+    if (!existingUser) {
+      existingUser = new UserDatabaseModel({
+        user: apiData.user,
+        firstName: apiData.firstname,
+        lastName: apiData.lastname,
+        email: apiData.email,
+        staff: apiData.staff,
+        courses: [],
+      });
+      await existingUser.save();
+    }
+
+    const accessToken = jwt.sign(
+      { userId: existingUser._id, staff: apiData.staff },
+      process.env.ACCESS_TOKEN_SECRET
+    );
+
+    res.status(200).json({
+      accessToken,
+      userId: existingUser._id.toString(),
+      staff: apiData.staff,
+    });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: "An error occurred during login" });
   }
 });
 */
-// DEPLOYMENT LOGIC
 app.post("/login", async (req, res) => {
-  const { username, password, studentNumber } = req.body;
+  const { username, password } = req.body;
 
   try {
     const apiResponse = await fetch("https://streams.metropolia.fi/2.0/api/", {
@@ -262,73 +236,42 @@ app.post("/login", async (req, res) => {
 
     if (apiData.message === "invalid username or password") {
       return res.status(401).json({ error: "invalid username or password" });
-    } else {
-      let existingUser = await UserDatabaseModel.findOne({
-        user: apiData.user,
-      });
-
-      if (!existingUser) {
-        // Create a new user if staff
-        existingUser = new UserDatabaseModel({
-          user: apiData.user,
-          firstName: apiData.firstname,
-          lastName: apiData.lastname,
-          email: apiData.email,
-          staff: apiData.staff,
-          studentNumber: [],
-          courses: [], // Assuming courses are initially empty
-        });
-        await existingUser.save();
-      }
-      let redirectUrl;
-
-      /*
-
-      if (!apiData.staff) {
-        // Handle student login
-        existingStudent = await StudentDatabaseModel.findOne({
-          studentNumber,
-        });
-
-        if (!existingStudent) {
-          // Create a new student record
-          existingStudent = new StudentDatabaseModel({
-            user: apiData.user,
-            studentNumber: studentNumber,
-            gdprConsent: false,
-            firstName: apiData.firstname,
-            lastName: apiData.lastname,
-            email: apiData.email,
-          });
-          await existingStudent.save();
-        }
-
-        // Set GDPR consent status for the student
-        redirectUrl = existingStudent.gdprConsent
-          ? "/studenthome"
-          : "/gdprconsentform";
-        apiData.userId = existingStudent._id.toString();
-      } else {
-        // Handle staff login
-        redirectUrl = "/teacherhome";
-        apiData.userId = existingUser ? existingUser._id.toString() : null;
-      }
-*/
-      apiData.userId = existingUser ? existingUser._id.toString() : null;
-
-      const accessToken = jwt.sign(
-        {
-          userId: existingUser ? existingUser._id : null, // Use the ObjectId of the user
-          studentNumber: studentNumber,
-          staff: apiData.staff,
-        },
-        process.env.ACCESS_TOKEN_SECRET
-      );
-
-      apiData.accessToken = accessToken;
-
-      res.status(200).json({ apiData, redirectUrl });
     }
+
+    // Temporarily bypass the staff check for testing
+    // if (!apiData.staff) {
+    //   return res.status(403).json({ error: "Access denied. Only staff can login." });
+    // }
+
+    let existingUser = await UserDatabaseModel.findOne({ user: apiData.user });
+
+    if (!existingUser) {
+      existingUser = new UserDatabaseModel({
+        user: apiData.user,
+        firstName: apiData.firstname,
+        lastName: apiData.lastname,
+        email: apiData.email,
+        staff: apiData.staff,
+        courses: [],
+      });
+      await existingUser.save();
+    }
+    let redirectUrl;
+
+    redirectUrl = existingUser ? "/teacherhome" : "/teacherhome";
+    apiData.userId = existingUser._id.toString();
+
+    const accessToken = jwt.sign(
+      { userId: existingUser._id, staff: apiData.staff },
+      process.env.ACCESS_TOKEN_SECRET
+    );
+
+    res.status(200).json({
+      redirectUrl,
+      accessToken,
+      userId: existingUser._id.toString(),
+      staff: apiData.staff,
+    });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: "An error occurred during login" });
@@ -342,18 +285,11 @@ app.get("/verify", async (req, res) => {
       return res.status(403).json({ error: "Invalid token" });
     }
     try {
+      // Fetch user details using the userId from the decoded token
       let existingUser = await UserDatabaseModel.findById(decoded.userId);
-      let existingStudent = null;
-
-      if (decoded.studentNumber) {
-        existingStudent = await StudentDatabaseModel.findOne({
-          studentNumber: decoded.studentNumber,
-        });
-      }
 
       const responseData = {
         user: existingUser ? existingUser.toObject() : null,
-        student: existingStudent ? existingStudent.toObject() : null,
         staff: decoded.staff,
       };
 
@@ -365,6 +301,39 @@ app.get("/verify", async (req, res) => {
   });
 });
 
+//DEPLOYMENT ONLY
+/*
+app.get("/verify", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ error: "Invalid token" });
+    }
+    try {
+      let existingUser = await UserDatabaseModel.findById(decoded.userId);
+      if (!existingUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (!decoded.staff) {
+        return res
+          .status(403)
+          .json({ error: "Access denied. Only staff can access." });
+      }
+
+      const responseData = {
+        user: existingUser.toObject(),
+        staff: decoded.staff,
+      };
+
+      res.status(200).json(responseData);
+    } catch (error) {
+      console.error("Error in /verify:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+});
+*/
 app.post("/createcourse", async (req, res) => {
   console.log("Create course request received", req.body);
 

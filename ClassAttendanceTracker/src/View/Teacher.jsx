@@ -11,6 +11,7 @@ import logo from "../assets/metropolia_s_orange.png";
 import AddTopics from "../components/AddTopics";
 import AddTeacherToCourse from "../components/AddTeachers";
 import DeactiveCourse from "../components/DeactiveCourse";
+import ShowStudents from "../components/ShowStudents";
 
 const TeacherHome = () => {
   const navigate = useNavigate();
@@ -44,6 +45,8 @@ const TeacherHome = () => {
         return <AddTeacherToCourse />;
       case "deactiveCourse":
         return <DeactiveCourse />;
+        case "showStudents":
+        return <ShowStudents />;
       default:
         return null;
     }
@@ -103,6 +106,11 @@ const TeacherHome = () => {
               className="block w-full bg-orange-600 text-white px-4 py-2 rounded mb-2 hover:bg-gray-700">
               Deactive course
             </button>
+            <button
+            onClick={() => setActiveView("showStudents")} // This button is updated
+            className="block w-full bg-orange-600 text-white px-4 py-2 rounded mb-2 hover:bg-gray-700">
+            Show Students
+          </button>
           </div>
 
           <div>

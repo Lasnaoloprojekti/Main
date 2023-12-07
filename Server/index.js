@@ -1324,6 +1324,21 @@ app.get("/getcoursestudents/:sessionId", async (req, res) => {
   }
 });
 
+app.get("/getstudentsbycourse/:courseId", async (req, res) => {
+  const { courseId } = req.params;
+  try {
+    const course = await CourseDatabaseModel.findById(courseId).populate("students");
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+    res.status(200).json({ students: course.students });
+  } catch (error) {
+    console.error("Error fetching students for course:", error);
+    res.status(500).json({ error: "An error occurred while fetching students for the course" });
+  }
+});
+
+
 server.listen(3001, () => {
   console.log("Server is running in port 3001");
 });

@@ -12,6 +12,9 @@ import AddTopics from "../components/AddTopics";
 import AddTeacherToCourse from "../components/AddTeachers";
 import DeactiveCourse from "../components/DeactiveCourse";
 import ShowStudents from "../components/ShowStudents";
+import AttendanceDataModification from "../components/AttendanceDataModification";
+import StudentModification from "../components/ModifyStudent";
+
 
 const TeacherHome = () => {
   const navigate = useNavigate();
@@ -47,6 +50,10 @@ const TeacherHome = () => {
         return <ShowStudents />;
       case "deactiveCourse":
         return <DeactiveCourse />;
+      case "attendanceDataModification":
+        return <AttendanceDataModification />;
+      case "studentModification":
+        return <StudentModification />;
       default:
         return null;
     }
@@ -110,6 +117,16 @@ const TeacherHome = () => {
               onClick={() => setActiveView("deactiveCourse")}
               className="block w-full bg-orange-600 text-white px-4 py-2 rounded mb-2 hover:bg-gray-700">
               Deactive course
+            </button>
+            <button
+              onClick={() => setActiveView("attendanceDataModification")}
+              className="block w-full bg-orange-600 text-white px-4 py-2 rounded mb-2 hover:bg-gray-700">
+              Attendance Data Modification
+            </button>
+            <button
+              onClick={() => setActiveView("studentModification")}
+              className="block w-full bg-orange-600 text-white px-4 py-2 rounded mb-2 hover:bg-gray-700">
+              Modify student
             </button>
           </div>
 

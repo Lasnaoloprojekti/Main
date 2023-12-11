@@ -286,7 +286,9 @@ const searchRealization = async (codes) => {
   const url = "/r1/realization/search";
 
   const apiKey = "uXIj6PjeH9oUHC6IQ7qG";
+  //const apiKey = process.env.REACT_APP_METROPOLIA_KEY;
   const authString = btoa(apiKey + ":");
+  //console.log("test" + process.env.REACT_APP_METROPOLIA_KEY);
 
   try {
     const response = await axios.post(url, body, {

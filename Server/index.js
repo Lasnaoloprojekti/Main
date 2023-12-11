@@ -378,7 +378,6 @@ app.post("/createcourse", async (req, res) => {
       students: [],
     });
 
-    // Save the course
     await newCourse.save();
 
     // If there are students to add, handle their addition
@@ -394,28 +393,26 @@ app.post("/createcourse", async (req, res) => {
             firstName,
             lastName,
             studentNumber,
-            courses: [newCourse._id],
+            gdprConsent: false,
+            courses: [{ course: newCourse._id }], // Assign course ID to new student
           });
-          await student.save();
         } else {
           // Add course to existing student's course list if not already present
-          if (!student.courses.includes(newCourse._id)) {
-            student.courses.push(newCourse._id);
-            await student.save();
+          if (!student.courses.some(c => c.course && c.course.equals(newCourse._id))) {
+            student.courses.push({ course: newCourse._id });
           }
         }
 
-        // Add student to the course's student list if not already added
-        if (!newCourse.students.includes(student._id)) {
-          newCourse.students.push(student._id);
-        }
+        await student.save();
+
+        // Add student ID to the course's student list
+        newCourse.students.push(student._id);
       }
 
       // Save the course with the updated student list
       await newCourse.save();
     }
 
-    // Send a success response
     res.status(200).json({ message: "Course created successfully", courseId: newCourse._id });
 
   } catch (error) {
@@ -423,6 +420,7 @@ app.post("/createcourse", async (req, res) => {
     res.status(500).json({ error: "An error occurred while creating the course" });
   }
 });
+
 
 app.post("/api/students/updategdpr", async (req, res) => {
   const { studentNumber, gdprConsent } = req.body;

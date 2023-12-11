@@ -384,42 +384,51 @@ app.post("/createcourse", async (req, res) => {
       teachers: teacherIds,
       students: [],
     });
-
+    
     await newCourse.save();
-
+    
+    // Extract topics from the newly created course
+    const courseTopics = newCourse.topics;
+    
     // If there are students to add, handle their addition
     if (studentsToAdd && studentsToAdd.length > 0) {
       for (const studentData of studentsToAdd) {
         const { firstName, lastName, studentNumber } = studentData;
-
+    
         let student = await StudentDatabaseModel.findOne({ studentNumber });
-
+    
         if (!student) {
-          // Create a new student record
+          // Create a new student record with topicsAttending
           student = new StudentDatabaseModel({
             firstName,
             lastName,
             studentNumber,
             gdprConsent: false,
-            courses: [{ course: newCourse._id }], // Assign course ID to new student
+            courses: [{
+              course: newCourse._id,
+              topicsAttending: courseTopics, // Assign course topics to new student
+            }],
           });
         } else {
           // Add course to existing student's course list if not already present
           if (!student.courses.some(c => c.course && c.course.equals(newCourse._id))) {
-            student.courses.push({ course: newCourse._id });
+            student.courses.push({ 
+              course: newCourse._id,
+              topicsAttending: courseTopics, // Assign course topics to existing student
+            });
           }
         }
-
+    
         await student.save();
-
+    
         // Add student ID to the course's student list
         newCourse.students.push(student._id);
       }
-
+    
       // Save the course with the updated student list
       await newCourse.save();
     }
-
+    
     res.status(200).json({ message: "Course created successfully", courseId: newCourse._id });
 
   } catch (error) {

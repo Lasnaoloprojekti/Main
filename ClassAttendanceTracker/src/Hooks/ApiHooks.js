@@ -285,7 +285,9 @@ const searchRealization = async (codes) => {
   const body = JSON.stringify({ codes });
   const url = "/r1/realization/search";
 
+  //console.log('Environment Variable:', process.env.REACT_APP_METROPOLIA_KEY);
   const apiKey = "uXIj6PjeH9oUHC6IQ7qG";
+ // const apiKey = process.env.REACT_APP_METROPOLIA_KEY;
   const authString = btoa(apiKey + ":");
 
   try {

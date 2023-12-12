@@ -7,7 +7,7 @@ export const StudentsOwnParticipations = () => {
   const fetchParticipationData = async () => {
     try {
       const response = await fetch(
-        `https://mdds-server-jj.northeurope.cloudapp.azure.com:3002/api/participations/${studentNumber}`
+        `http://localhost:3002/api/participations/${studentNumber}`
       );
       const data = await response.json();
       setParticipationData(data);

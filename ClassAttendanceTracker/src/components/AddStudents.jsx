@@ -202,6 +202,3 @@ const AddStudents = () => {
 };
 
 export default AddStudents;
-
-// Author: Adam Ahmethanov
-// Date: November 7, 2023
